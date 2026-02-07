@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>潘薪融 | Project Manager & Operations Expert</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'dark': '#352E2A',
+                        'cream': '#EBDEC6',
+                        'accent': '#B57743'
+                    },
+                    fontFamily: {
+                        'display': ['Playfair Display', 'serif'],
+                        'body': ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { overflow-x: hidden; }
+        
+        body {
+            background: #352E2A;
+            color: #EBDEC6;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        /* Noise */
+        .noise {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.03;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+        }
+        
+        /* Cursor */
+        .cursor { position: fixed; width: 18px; height: 18px; border: 1px solid #EBDEC6; border-radius: 50%; pointer-events: none; z-index: 10000; mix-blend-mode: difference; transition: transform 0.1s, width 0.2s, height 0.2s; transform: translate(-50%, -50%); }
+        .cursor.hover { width: 45px; height: 45px; border-color: #B57743; }
+        .cursor-dot { position: fixed; width: 5px; height: 5px; background: #EBDEC6; border-radius: 50%; pointer-events: none; z-index: 10001; transform: translate(-50%, -50%); }
+        
+        /* Typography */
+        .hero-name { font-family: 'Playfair Display', serif; font-size: clamp(5rem, 16vw, 13rem); font-weight: 500; line-height: 0.88; letter-spacing: -0.04em; color: #EBDEC6; }
+        .section-title { font-family: 'Playfair Display', serif; font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 500; color: #EBDEC6; margin-bottom: 2.5rem; }
+        
+        /* Glass */
+        .glass { background: rgba(235, 222, 198, 0.06); backdrop-filter: blur(16px); border: 1px solid rgba(235, 222, 198, 0.12); border-radius: 20px; transition: all 0.35s ease; }
+        .glass:hover { background: rgba(235, 222, 198, 0.1); border-color: rgba(181, 119, 67, 0.4); transform: translateY(-5px); }
+        .glass-accent { background: rgba(181, 119, 67, 0.12); border: 1px solid rgba(181, 119, 67, 0.25); border-radius: 20px; transition: all 0.35s ease; }
+        .glass-accent:hover { background: rgba(181, 119, 67, 0.2); border-color: rgba(181, 119, 67, 0.45); transform: translateY(-5px); }
+        
+        /* Buttons */
+        .btn-primary { display: inline-flex; align-items: center; gap: 0.5rem; padding: 1rem 2rem; background: #B57743; color: #352E2A; font-weight: 500; border-radius: 100px; transition: all 0.3s ease; border: none; cursor: pointer; font-size: 0.9rem; }
+        .btn-primary:hover { background: #C98956; transform: scale(1.03); box-shadow: 0 12px 30px rgba(181, 119, 67, 0.25); }
+        .btn-secondary { display: inline-flex; align-items: center; gap: 0.5rem; padding: 1rem 2rem; background: transparent; color: #EBDEC6; font-weight: 500; border-radius: 100px; border: 1px solid rgba(235, 222, 198, 0.25); transition: all 0.3s ease; cursor: pointer; font-size: 0.9rem; }
+        .btn-secondary:hover { border-color: #B57743; background: rgba(181, 119, 67, 0.1); }
+        
+        /* Photo Modal */
+        .photo-modal { position: fixed; inset: 0; z-index: 9998; display: flex; align-items: center; justify-content: center; background: rgba(53, 46, 42, 0.96); opacity: 0; visibility: hidden; transition: all 0.4s ease; }
+        .photo-modal.active { opacity: 1; visibility: visible; }
+        .photo-modal img { max-width: 75vw; max-height: 75vh; border-radius: 8px; box-shadow: 0 30px 80px rgba(0,0,0,0.5); transform: scale(0.92); transition: transform 0.4s ease; }
+        .photo-modal.active img { transform: scale(1); }
+        .photo-modal img:hover { transform: scale(1.02); }
+        
+        /* Timeline */
+        .timeline-item { position: relative; padding-left: 2rem; padding-bottom: 2rem; border-left: 1px solid rgba(235, 222, 198, 0.12); }
+        .timeline-item::before { content: ''; position: absolute; left: -4px; top: 0.4rem; width: 7px; height: 7px; background: #352E2A; border: 1.5px solid #EBDEC6; border-radius: 50%; transition: all 0.3s ease; }
+        .timeline-item:hover::before { background: #B57743; border-color: #B57743; }
+        
+        /* Info Cards */
+        .info-card { background: rgba(181, 119, 67, 0.1); border: 1px solid rgba(181, 119, 67, 0.25); border-radius: 16px; padding: 1.25rem; display: flex; align-items: center; gap: 0.875rem; transition: all 0.3s ease; }
+        .info-card:hover { background: rgba(181, 119, 67, 0.18); border-color: rgba(181, 119, 67, 0.4); transform: translateY(-3px); }
+        
+        /* Marquee */
+        .marquee-container { overflow: hidden; cursor: grab; }
+        .marquee-container:active { cursor: grabbing; }
+        .marquee-track { display: inline-flex; animation: marquee 45s linear infinite; }
+        .marquee-track.paused { animation-play-state: paused; }
+        @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+        .skill-tag { display: inline-flex; padding: 0.875rem 1.75rem; margin: 0 0.5rem; background: rgba(181, 119, 67, 0.15); border: 1px solid rgba(181, 119, 67, 0.35); border-radius: 100px; font-size: 0.85rem; font-weight: 500; color: #EBDEC6; transition: all 0.3s ease; flex-shrink: 0; }
+        .skill-tag:hover { background: rgba(181, 119, 67, 0.28); border-color: #B57743; }
+        
+        /* Awards Swipe */
+        .awards-wrap { position: relative; overflow: hidden; }
+        .awards-content { display: flex; gap: 1rem; transition: transform 0.35s ease; }
+        .award-photo { flex-shrink: 0; width: 180px; height: 120px; border-radius: 12px; overflow: hidden; opacity: 0; transform: translateX(-15px); transition: all 0.35s ease; }
+        .awards-wrap:hover .award-photo, .awards-wrap.dragged .award-photo { opacity: 1; transform: translateX(0); }
+        .award-photo img { width: 100%; height: 100%; object-fit: cover; }
+        .swipe-hint { font-size: 0.7rem; color: rgba(235, 222, 198, 0.35); margin-top: 0.75rem; display: flex; align-items: center; gap: 0.25rem; }
+        
+        /* Module Title */
+        .mod-title { font-family: 'Playfair Display', serif; font-size: 1.05rem; font-weight: 500; color: #EBDEC6; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+        
+        /* Bento */
+        .bento-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem; }
+        .bento-item { padding: 1.75rem; }
+        .bento-large { grid-column: span 2; grid-row: span 2; }
+        .bento-wide { grid-column: span 2; }
+        
+        /* Footer */
+        .footer-cta { font-family: 'Playfair Display', serif; font-size: clamp(2.5rem, 9vw, 7rem); font-weight: 500; color: #EBDEC6; transition: color 0.3s ease; }
+        .footer-cta:hover { color: #B57743; }
+        
+        /* Status */
+        .status-ind { display: flex; align-items: center; gap: 0.4rem; font-size: 0.8rem; color: #4ADE80; background: rgba(74, 222, 128, 0.08); padding: 0.4rem 0.875rem; border-radius: 100px; border: 1px solid rgba(74, 222, 128, 0.15); }
+        .status-dot { width: 6px; height: 6px; background: #4ADE80; border-radius: 50%; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        
+        /* Lang Switch */
+        .lang-switch { display: flex; gap: 0.15rem; background: rgba(235, 222, 198, 0.06); border: 1px solid rgba(235, 222, 198, 0.12); border-radius: 100px; padding: 0.2rem; }
+        .lang-btn { padding: 0.4rem 0.875rem; border-radius: 100px; font-size: 0.8rem; font-weight: 500; color: rgba(235, 222, 198, 0.5); transition: all 0.3s ease; background: transparent; border: none; cursor: pointer; }
+        .lang-btn.active { background: #B57743; color: #352E2A; }
+        
+        /* Highlights */
+        .hl-num { color: #B57743; font-weight: 600; }
+        .data-badge { display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.3rem 0.7rem; background: rgba(181, 119, 67, 0.12); border: 1px solid rgba(181, 119, 67, 0.25); border-radius: 100px; font-size: 0.75rem; font-weight: 500; color: #B57743; margin: 0.15rem; }
+        
+        /* Reveal */
+        .reveal { opacity: 0; transform: translateY(25px); }
+        
+        /* Scroll hint */
+        .scroll-hint { position: absolute; bottom: 3rem; left: 50%; transform: translateX(-50%); }
+        .scroll-hint-inner { width: 26px; height: 42px; border: 1.5px solid rgba(235, 222, 198, 0.2); border-radius: 13px; display: flex; justify-content: center; padding-top: 8px; }
+        .scroll-dot { width: 4px; height: 8px; background: rgba(235, 222, 198, 0.4); border-radius: 2px; animation: bounce 1.5s infinite; }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(6px); } }
+        
+        /* Oriental Pearl */
+        .oriental-icon { width: 22px; height: 30px; }
+        
+        @media (max-width: 768px) {
+            .bento-grid { grid-template-columns: 1fr; }
+            .bento-large, .bento-wide { grid-column: span 1; }
+            .cursor, .cursor-dot { display: none; }
+            body { cursor: auto; }
+            .hero-name { font-size: clamp(3.5rem, 14vw, 8rem); }
+        }
+        
+        ::selection { background: rgba(181, 119, 67, 0.35); color: #352E2A; }
+    </style>
+<base target="_blank">
+</head>
+<body>
+    <div class="noise"></div>
+    
+    <!-- Photo Modal -->
+    <div id="photoModal" class="photo-modal" onclick="closePhotoModal()">
+        <img src="照片.jpg" alt="Pan Xinrong">
+    </div>
+    
+    <!-- Custom Cursor -->
+    <div class="cursor" id="cursor"></div>
+    <div class="cursor-dot" id="cursorDot"></div>
+    
+    <div id="app">
+        <!-- Nav -->
+        <nav class="fixed top-0 left-0 right-0 z-50 px-6 py-4 flex justify-end items-center gap-3">
+            <div class="status-ind">
+                <span class="status-dot"></span>
+                <span>available</span>
+            </div>
+            <div class="lang-switch">
+                <button class="lang-btn" :class="{ active: lang === 'zh' }" @click="setLang('zh')">中文</button>
+                <button class="lang-btn" :class="{ active: lang === 'en' }" @click="setLang('en')">EN</button>
+            </div>
+        </nav>
+        
+        <!-- HERO -->
+        <section class="min-h-screen flex flex-col justify-center items-center relative px-6 pt-16">
+            <div class="text-center z-10">
+                <!-- Position Tag -->
+                <div class="hero-tag opacity-0 mb-10">
+                    <span class="glass px-6 py-2.5 text-sm tracking-[0.25em] uppercase">{{ t('position') }}</span>
+                </div>
+                
+                <!-- Name -->
+                <h1 class="hero-name opacity-0 mb-8">
+                    <span class="char" v-for="(c, i) in t('name').split('')" :key="i">{{ c }}</span>
+                </h1>
+                
+                <!-- English Name -->
+                <p class="hero-en opacity-0 text-xl md:text-2xl font-display italic text-cream/45 mb-12">
+                    {{ profile.englishName }}
+                </p>
+                
+                <!-- Intro -->
+                <p class="hero-intro opacity-0 max-w-2xl mx-auto text-base leading-relaxed text-cream/65 mb-14 px-4">
+                    {{ t('intro') }}
+                </p>
+                
+                <!-- Buttons -->
+                <div class="hero-btns opacity-0 flex flex-wrap justify-center gap-4">
+                    <a :href="'mailto:' + profile.email" class="btn-primary magnetic">
+                        <i data-lucide="mail" class="w-4 h-4"></i>
+                        <span>{{ t('btnEmail') }}</span>
+                    </a>
+                    <a href="#experience" class="btn-secondary magnetic">
+                        <i data-lucide="briefcase" class="w-4 h-4"></i>
+                        <span>{{ t('btnExp') }}</span>
+                    </a>
+                    <button class="btn-secondary magnetic" onclick="openPhotoModal()">
+                        <i data-lucide="image" class="w-4 h-4"></i>
+                        <span>{{ t('btnPhoto') }}</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Scroll Hint -->
+            <div class="scroll-hint opacity-0">
+                <div class="scroll-hint-inner">
+                    <div class="scroll-dot"></div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- ABOUT -->
+        <section id="about" class="py-28 px-6 md:px-12 lg:px-20">
+            <div class="max-w-6xl mx-auto">
+                <h2 class="section-title reveal">{{ t('aboutTitle') }}</h2>
+                
+                <div class="bento-grid">
+                    <!-- Intro -->
+                    <div class="bento-item bento-large glass reveal">
+                        <h3 class="mod-title">
+                            <i data-lucide="user" class="w-5 h-5 text-accent"></i>
+                            {{ t('introTitle') }}
+                        </h3>
+                        <p class="text-cream/65 text-sm leading-relaxed">{{ t('about') }}</p>
+                    </div>
+                    
+                     <!-- Info Row -->
+                    <div class="bento-item glass-accent reveal" style="grid-column: span 1;">
+                        <div class="flex gap-3">
+                            <div class="info-card flex-1">
+                                <i data-lucide="clock" class="w-5 h-5 text-accent flex-shrink-0"></i>
+                                <div>
+                                    <div class="text-xl font-display text-accent">{{ profile.experienceYears }}+</div>
+                                    <div class="text-cream/45 text-xs">{{ t('yearsLabel') }}</div>
+                                </div>
+                            </div>
+                            <div class="info-card flex-1">
+                                <svg class="oriental-icon flex-shrink-0 text-accent" viewBox="0 0 24 32" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <path d="M12 2L15 5H9L12 2Z" fill="currentColor"/>
+                                    <path d="M12 5V26M12 8C14 8 15 10 15 12C15 14 14 16 12 16C10 16 9 14 9 12C9 10 10 8 12 8Z" stroke="currentColor"/>
+                                    <path d="M8 23H16M7 26H17M6 29H18" stroke="currentColor"/>
+                                    <circle cx="12" cy="20" r="1" fill="currentColor"/>
+                                    <circle cx="12" cy="23" r="1" fill="currentColor"/>
+                                </svg>
+                                <div>
+                                    <div class="text-lg font-display text-accent">{{ profile.city }}</div>
+                                    <div class="text-cream/45 text-xs">{{ t('baseLabel') }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Awards with Swipe -->
+                    <div class="bento-item glass-accent reveal awards-wrap" 
+                         @mousedown="startAwardsDrag" @mousemove="onAwardsDrag" @mouseup="endAwardsDrag" @mouseleave="endAwardsDrag"
+                         @touchstart="startAwardsDrag" @touchmove="onAwardsDrag" @touchend="endAwardsDrag">
+                        <h3 class="mod-title">
+                            <i data-lucide="award" class="w-5 h-5 text-accent"></i>
+                            {{ t('awardsTitle') }}
+                        </h3>
+                        <div class="awards-content" :style="{ transform: `translateX(${awardsDrag}px)` }" :class="{ dragged: isAwardsDragging }">
+                            <div class="flex-1">
+                                <ul class="space-y-1.5 text-sm text-cream/55">
+                                    <li v-for="a in t('awards').slice(0, 3)" :key="a" class="flex items-center gap-2">
+                                        <span class="w-1 h-1 bg-accent rounded-full"></span>
+                                        <span>{{ a }}</span>
+                                    </li>
+                                </ul>
+                                <p class="swipe-hint">
+                                    <i data-lucide="move-horizontal" class="w-3 h-3"></i>
+                                    {{ t('swipeHint') }}
+                                </p>
+                            </div>
+                            <div class="award-photo">
+                                <img src="早稻田.png" alt="Waseda">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Education -->
+                    <div class="bento-item bento-wide glass reveal">
+                        <h3 class="mod-title">
+                            <i data-lucide="graduation-cap" class="w-5 h-5 text-accent"></i>
+                            {{ t('eduTitle') }}
+                        </h3>
+                        <div>
+                            <div class="font-display text-lg text-cream">{{ t('school') }}</div>
+                            <div class="text-cream/55 text-sm">{{ t('major') }}</div>
+                            <div class="text-cream/35 text-xs mt-1">{{ profile.education.period }} · GPA {{ profile.education.gpa }}</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Languages -->
+                    <div class="bento-item glass reveal">
+                        <h3 class="mod-title">
+                            <i data-lucide="languages" class="w-5 h-5 text-accent"></i>
+                            {{ t('langTitle') }}
+                        </h3>
+                        <div class="space-y-2">
+                            <div v-for="l in t('languages')" :key="l.name" class="flex justify-between items-center text-sm border-b border-cream/8 pb-1.5 last:border-0">
+                                <span class="text-cream/65">{{ l.name }}</span>
+                                <span class="text-accent text-xs">{{ l.level }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- EXPERIENCE -->
+        <section id="experience" class="py-28 px-6 md:px-12 lg:px-20">
+            <div class="max-w-4xl mx-auto">
+                <h2 class="section-title reveal">{{ t('expTitle') }}</h2>
+                
+                <div class="space-y-6">
+                    <div v-for="(exp, i) in t('experience')" :key="i" class="timeline-item reveal glass rounded-xl p-5">
+                        <div class="flex flex-col md:flex-row md:items-start md:justify-between mb-3">
+                            <div>
+                                <h3 class="font-display text-xl text-cream font-medium">{{ exp.company }}</h3>
+                                <p class="text-accent text-sm mt-0.5">{{ exp.position }}</p>
+                            </div>
+                            <span class="text-cream/35 text-xs font-mono mt-1.5 md:mt-0">{{ exp.period }}</span>
+                        </div>
+                        <ul class="space-y-2 text-sm text-cream/55">
+                            <li v-for="(d, j) in exp.descriptions" :key="j" class="flex items-start gap-2">
+                                <span class="w-1 h-1 bg-accent rounded-full mt-2 flex-shrink-0"></span>
+                                <span v-html="d"></span>
+                            </li>
+                        </ul>
+                        <div v-if="exp.metrics && exp.metrics.length" class="mt-4 flex flex-wrap gap-2">
+                            <span v-for="m in exp.metrics" :key="m.label" class="data-badge">
+                                <i data-lucide="trending-up" class="w-3 h-3"></i>
+                                {{ m.value }} {{ m.label }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- SKILLS -->
+        <section id="skills" class="py-20 overflow-hidden">
+            <div class="px-6 md:px-12 lg:px-20 mb-8">
+                <h2 class="section-title reveal" style="margin-bottom: 1rem;">{{ t('skillsTitle') }}</h2>
+            </div>
+            
+            <div class="marquee-container reveal py-3"
+                 @mousedown="startDrag" @mousemove="onDrag" @mouseup="endDrag" @mouseleave="endDrag">
+                <div class="marquee-track" :class="{ paused: isDragging }" :style="{ transform: `translateX(${dragX}px)` }">
+                    <span v-for="s in [...t('skills'), ...t('skills')]" :key="s" class="skill-tag">{{ s }}</span>
+                </div>
+            </div>
+            
+            <div class="marquee-container mt-4 reveal py-3"
+                 @mousedown="startDrag2" @mousemove="onDrag2" @mouseup="endDrag2" @mouseleave="endDrag2">
+                <div class="marquee-track" :class="{ paused: isDragging2 }" style="animation-direction: reverse; animation-duration: 55s;" :style="{ transform: `translateX(${dragX2}px)` }">
+                    <span v-for="t2 in [...t('tools'), ...t('tools')]" :key="t2" class="skill-tag">{{ t2 }}</span>
+                </div>
+            </div>
+        </section>
+        
+        <!-- FOOTER -->
+        <footer class="py-20 px-6">
+            <div class="text-center max-w-2xl mx-auto">
+                <p class="text-cream/35 text-sm mb-6 reveal">{{ t('readyText') }}</p>
+                <a :href="'mailto:' + profile.email" class="footer-cta reveal inline-block">{{ t('contactTitle') }}</a>
+                <div class="mt-10 flex flex-wrap justify-center gap-8 reveal">
+                    <a :href="'mailto:' + profile.email" class="flex items-center gap-2 text-cream/45 hover:text-accent transition-colors text-sm">
+                        <i data-lucide="mail" class="w-4 h-4"></i>
+                        <span>{{ profile.email }}</span>
+                    </a>
+                    <a :href="'tel:' + profile.phone" class="flex items-center gap-2 text-cream/45 hover:text-accent transition-colors text-sm">
+                        <i data-lucide="phone" class="w-4 h-4"></i>
+                        <span>{{ profile.phone }}</span>
+                    </a>
+                </div>
+                <p class="mt-14 text-cream/2 text-xs reveal">© {{ new Date().getFullYear() }} {{ t('name') }}</p>
+            </div>
+        </footer>
+    </div>
+    
+    <script>
+        // Photo Modal Functions
+        function openPhotoModal() {
+            document.getElementById('photoModal').classList.add('active');
+        }
+        
+        function closePhotoModal() {
+            document.getElementById('photoModal').classList.remove('active');
+        }
+        
+        // Data
+        const profileData = {
+            name: "潘薪融", englishName: "Pan Xinrong",
+            position: { zh: "项目经理 & 运营专家", en: "Project Manager & Operations Expert" },
+            email: "amberpanxinrong@163.com", phone: "(+86) 15606489727", city: "上海", experienceYears: 2,
+            education: { school: { zh: "中国海洋大学", en: "Ocean University of China" }, major: { zh: "管理学院 工商管理专业", en: "Business Administration" }, period: "2019.09 - 2023.06", gpa: "3.26/4.00" },
+            intro: { zh: "高效的资源整合者，擅长在复杂商业场景中快速定位合作点。具有领导能力，协调多个团队推广产品。", en: "An efficient resource integrator, adept at quickly identifying collaboration opportunities in complex business environments." },
+            about: { zh: "我是一名拥有2年+工作经验的项目经理与运营专家，专注于支付解决方案、产品营销与数据分析。我经常与品牌方、银行合作，整合多方资源进行项目推动。我具有良好的英文写作能力和口语交流能力，具有很强的自驱力和学习能力，我会对工作进行及时复盘，快速迭代方法论，适应新的工作环境和挑战。", en: "I am a Project Manager & Operations Expert with 2+ years of experience, specializing in payment solutions, product marketing, and data analytics. I frequently partner with brands and banks to drive projects forward." },
+            languages: { zh: [{ name: "英语", level: "雅思 6.5" }, { name: "德语", level: "基础会话" }], en: [{ name: "English", level: "IELTS 6.5" }, { name: "German", level: "Basic" }] },
+            awards: { zh: ["院学业奖学金", "院创新创业奖学金", "早稻田大学国际创业人才项目优秀成员", "美国大学生数学建模大赛S奖"], en: ["Academic Scholarship", "Innovation Scholarship", "Waseda Outstanding Member", "MCM/ICM S Award"] },
+            experience: {
+                zh: [
+                    { company: "通联支付", position: "项目经理", period: "2024.09 - 至今", descriptions: ["主导<span class='hl-num'>3个</span>项目支付解决方案落地，协调技术-产品-风控团队，达成<span class='hl-num'>100%</span>项目按期交付", "面向银行、销售人员等<span class='hl-num'>200+</span>关键干系人进行产品宣讲，客户签约率提升<span class='hl-num'>65%</span>，季度交易金额增长<span class='hl-num'>36%</span>，净收增长<span class='hl-num'>11%</span>", "从0-1主导行业产品孵化，支撑全国<span class='hl-num'>34+</span>分公司推广活动，净收增长<span class='hl-num'>13%</span>，系统交易规模<span class='hl-num'>1.2亿</span>，月度交易流水峰值<span class='hl-num'>196亿元</span>", "构建多维度分析模型，输出<span class='hl-num'>30+</span>份数据报告，驱动产品迭代升级"], metrics: [{ value: "+65%", label: "签约率" }, { value: "+36%", label: "交易额" }, { value: "196亿", label: "月流水峰值" }] },
+                    { company: "美团", position: "商品运营", period: "2023.07 - 2024.04", descriptions: ["负责<span class='hl-num'>7个</span>品类运营，包括服饰家纺、食品酒水、生鲜等，制定区域客群差异化定价策略", "连续两个月超目标完成业绩，实现毛利<span class='hl-num'>+2.13pp</span>，GMV<span class='hl-num'>+17.3%</span>的业务双涨", "协调采购、销售、供应商资源，策划双十一等大型营销活动，有效提升新品打爆成功率与活动ROI"], metrics: [{ value: "+2.13pp", label: "毛利" }, { value: "+17.3%", label: "GMV" }] },
+                    { company: "得物", position: "服装运营实习", period: "2023.04 - 2023.06", descriptions: ["负责品牌销售数据分析，协助卖家选品、定价以达成更好的销售结果", "与品牌方对接营销活动细节，协助搭建产品落地页，通过用户分析配置最优产品顺序"], metrics: [] }
+                ],
+                en: [
+                    { company: "Tonglian Pay", position: "Project Manager", period: "2024.09 - Present", descriptions: ["Led <span class='hl-num'>3</span> payment solution projects, coordinated teams, achieved <span class='hl-num'>100%</span> on-time delivery", "Presented to <span class='hl-num'>200+</span> stakeholders, increased contract rate by <span class='hl-num'>65%</span>, transaction volume up <span class='hl-num'>36%</span>", "Led 0-to-1 product incubation, supported <span class='hl-num'>34+</span> branches, net revenue up <span class='hl-num'>13%</span>, peak monthly flow <span class='hl-num'>19.6B</span>", "Built analytics models, produced <span class='hl-num'>30+</span> data reports"], metrics: [{ value: "+65%", label: "Contracts" }, { value: "+36%", label: "Volume" }, { value: "19.6B", label: "Peak" }] },
+                    { company: "Meituan", position: "Merchandising", period: "2023.07 - 2024.04", descriptions: ["Managed <span class='hl-num'>7</span> product categories, formulated differentiated pricing strategies", "Exceeded targets for 2 months, gross margin <span class='hl-num'>+2.13pp</span>, GMV <span class='hl-num'>+17.3%</span>", "Coordinated resources, planned Double 11 campaigns"], metrics: [{ value: "+2.13pp", label: "Margin" }, { value: "+17.3%", label: "GMV" }] },
+                    { company: "DeWu", position: "Apparel Operations Intern", period: "2023.04 - 2023.06", descriptions: ["Analyzed brand sales data, assisted sellers in product selection and pricing", "Coordinated with brands for campaigns, assisted in building landing pages"], metrics: [] }
+                ]
+            },
+            skills: { zh: ["项目管理", "产品营销", "数据分析", "运营策略", "需求分析", "原型设计", "数据建模", "跨部门协作", "资源整合", "团队领导"], en: ["Project Management", "Product Marketing", "Data Analytics", "Operations Strategy", "Requirements Analysis", "Prototyping", "Data Modeling", "Cross-functional Collaboration", "Resource Integration", "Team Leadership"] },
+            tools: { zh: ["Excel", "Python", "SQL Server", "Photoshop", "Project", "CAD"], en: ["Excel", "Python", "SQL Server", "Photoshop", "Project", "CAD"] },
+            ui: { zh: { btnEmail: "联系邮箱", btnExp: "工作经历", btnPhoto: "查看照片", aboutTitle: "关于我", introTitle: "个人简介", yearsLabel: "工作经验", baseLabel: "所在城市", eduTitle: "教育背景", awardsTitle: "荣誉奖项", langTitle: "语言能力", expTitle: "工作经历", skillsTitle: "技能专长", swipeHint: "右滑查看更多", readyText: "准备好开始合作了吗？", contactTitle: "联系我" }, en: { btnEmail: "Email", btnExp: "Experience", btnPhoto: "Photo", aboutTitle: "About", introTitle: "Introduction", yearsLabel: "Experience", baseLabel: "Location", eduTitle: "Education", awardsTitle: "Awards", langTitle: "Languages", expTitle: "Experience", skillsTitle: "Skills", swipeHint: "Swipe right", readyText: "Ready to collaborate?", contactTitle: "Contact" } }
+        };
+        
+        const { createApp, ref, computed, onMounted } = Vue;
+        
+        createApp({
+            setup() {
+                const lang = ref('zh');
+                const isDragging = ref(false);
+                const isDragging2 = ref(false);
+                const dragX = ref(0);
+                const dragX2 = ref(0);
+                const dragStart = ref(0);
+                const dragStart2 = ref(0);
+                const awardsDrag = ref(0);
+                const awardsStart = ref(0);
+                const isAwardsDragging = ref(false);
+                
+                const t = computed(() => (key) => {
+                    const keys = key.split('.');
+                    let val = profileData;
+                    for (const k of keys) val = val?.[k];
+                    return typeof val === 'object' && val !== null ? val[lang.value] : val;
+                });
+                
+                const setLang = (l) => { lang.value = l; };
+                
+                // Drag handlers
+                const startDrag = (e) => { isDragging.value = true; dragStart.value = e.clientX || e.touches[0].clientX; };
+                const onDrag = (e) => { if (!isDragging.value) return; dragX.value = (e.clientX || e.touches[0].clientX) - dragStart.value; };
+                const endDrag = () => { isDragging.value = false; gsap.to(dragX, { value: 0, duration: 0.4 }); };
+                
+                const startDrag2 = (e) => { isDragging2.value = true; dragStart2.value = e.clientX || e.touches[0].clientX; };
+                const onDrag2 = (e) => { if (!isDragging2.value) return; dragX2.value = (e.clientX || e.touches[0].clientX) - dragStart2.value; };
+                const endDrag2 = () => { isDragging2.value = false; gsap.to(dragX2, { value: 0, duration: 0.4 }); };
+                
+                const startAwardsDrag = (e) => { isAwardsDragging.value = true; awardsStart.value = e.clientX || e.touches[0].clientX; };
+                const onAwardsDrag = (e) => { if (!isAwardsDragging.value) return; awardsDrag.value = Math.min(0, (e.clientX || e.touches[0].clientX) - awardsStart.value); };
+                const endAwardsDrag = () => { isAwardsDragging.value = false; };
+                
+                onMounted(() => {
+                    lucide.createIcons();
+                    
+                    // Cursor
+                    const cursor = document.getElementById('cursor');
+                    const cursorDot = document.getElementById('cursorDot');
+                    if (cursor && !window.matchMedia('(pointer: coarse)').matches) {
+                        document.addEventListener('mousemove', (e) => {
+                            gsap.to(cursor, { x: e.clientX, y: e.clientY, duration: 0.1 });
+                            gsap.to(cursorDot, { x: e.clientX, y: e.clientY, duration: 0.05 });
+                        });
+                        document.querySelectorAll('a, button, .glass, .skill-tag').forEach(el => {
+                            el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
+                            el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
+                        });
+                    }
+                    
+                    // GSAP Animations
+                    gsap.registerPlugin(ScrollTrigger);
+                    
+                    // Hero entrance
+                    const heroTl = gsap.timeline({ delay: 0.3 });
+                    heroTl.to('.hero-tag', { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out' })
+                          .from('.hero-name .char', { y: 100, opacity: 0, rotateX: -80, stagger: 0.05, duration: 1, ease: 'power4.out' }, '-=0.3')
+                          .to('.hero-name', { opacity: 1, duration: 0.1 }, '-=1')
+                          .to('.hero-en', { opacity: 1, y: 0, duration: 0.6 }, '-=0.5')
+                          .to('.hero-intro', { opacity: 1, y: 0, duration: 0.6 }, '-=0.4')
+                          .to('.hero-btns', { opacity: 1, y: 0, duration: 0.6 }, '-=0.4')
+                          .to('.scroll-hint', { opacity: 1, duration: 0.5 }, '-=0.2');
+                    
+                    // Scroll reveals
+                    gsap.utils.toArray('.reveal').forEach(el => {
+                        gsap.fromTo(el, { opacity: 0, y: 20 }, {
+                            opacity: 1, y: 0, duration: 0.6, ease: 'power2.out',
+                            scrollTrigger: { trigger: el, start: 'top 88%', toggleActions: 'play none none none' }
+                        });
+                    });
+                });
+                
+                return {
+                    lang, t, profile: profileData, setLang,
+                    isDragging, isDragging2, dragX, dragX2,
+                    awardsDrag, isAwardsDragging,
+                    startDrag, onDrag, endDrag,
+                    startDrag2, onDrag2, endDrag2,
+                    startAwardsDrag, onAwardsDrag, endAwardsDrag
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
