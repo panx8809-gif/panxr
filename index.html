@@ -172,6 +172,25 @@
             .hero-name { font-size: clamp(3.5rem, 14vw, 8rem); }
         }
         
+        /* Progress Ring */
+        .progress-ring { transform: rotate(-90deg); }
+        .progress-ring-bg { fill: none; stroke: rgba(235, 222, 198, 0.1); stroke-width: 3; }
+        .progress-ring-fill { fill: none; stroke: #B57743; stroke-width: 3; stroke-linecap: round; transition: stroke-dashoffset 0.5s ease; }
+        
+        .lang-item { display: flex; align-items: center; gap: 0.75rem; }
+        .lang-info { display: flex; flex-direction: column; }
+        .lang-name { font-size: 0.9rem; color: #EBDEC6; }
+        .lang-level { font-size: 0.75rem; color: #B57743; }
+        
+        .oriental-icon { width: 22px; height: 30px; }
+        
+        @media (max-width: 768px) {
+            .bento-grid { grid-template-columns: 1fr; }
+            .bento-large, .bento-wide { grid-column: span 1; }
+            .cursor, .cursor-dot { display: none; }
+            body { cursor: auto; }
+            .hero-name { font-size: clamp(3.5rem, 14vw, 8rem); }
+        }
         ::selection { background: rgba(181, 119, 67, 0.35); color: #352E2A; }
     </style>
 <base target="_blank">
@@ -327,7 +346,7 @@
                                 </p>
                             </div>
                             <div class="award-photo">
-                                <img src="早稻田.png" alt="Waseda">
+                                <img src="https://raw.githubusercontent.com/panx8809-gif/picture/refs/heads/main/%E6%97%A9%E7%A8%BB%E7%94%B0.png" alt="Waseda">
                             </div>
                         </div>
                     </div>
@@ -575,5 +594,6 @@
 </body>
 
 </html>
+
 
 
