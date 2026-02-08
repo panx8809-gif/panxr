@@ -272,7 +272,7 @@
                                     <div class="text-xl font-display text-accent">{{ profile.experienceYears }}+</div>
                                     <div class="text-cream/45 text-xs">
                                     <span v-if="lang === 'zh'">工作经验</span>
-                                    <span v-else>Experience</span></div></div>
+                                    <span v-else>Experience</span></div>
                                 </div>
                             </div>
                             <div class="info-card flex-1">
@@ -290,7 +290,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <!-- Education -->
                     <div class="bento-item glass reveal">
                         <h3 class="mod-title">
@@ -306,7 +306,7 @@
                     </div>
                     
                     <!-- Awards with Swipe -->
-                    <div class="bento-item glass-accent reveal awards-wrap" 
+                    <div class="bento-item bento-large glass-accent reveal awards-wrap" 
                          @mousedown="startAwardsDrag" @mousemove="onAwardsDrag" @mouseup="endAwardsDrag" @mouseleave="endAwardsDrag"
                          @touchstart="startAwardsDrag" @touchmove="onAwardsDrag" @touchend="endAwardsDrag">
                         <h3 class="mod-title">
@@ -327,12 +327,12 @@
                                 </p>
                             </div>
                             <div class="award-photo">
-                                <img src="https://raw.githubusercontent.com/panx8809-gif/picture/refs/heads/main/%E6%97%A9%E7%A8%BB%E7%94%B0.png" alt="Waseda">
+                                <img src="早稻田.png" alt="Waseda">
                             </div>
                         </div>
                     </div>
                     
-                     <!-- Languages -->
+                    <!-- Languages -->
                     <div class="bento-item glass reveal">
                         <div class="flex flex-col md:flex-row gap-6">
                     <div class="flex-1 border-t md:border-t-0 border-cream/10 pt-4 md:pt-0 md:pl">
@@ -575,4 +575,5 @@
 </body>
 
 </html>
+
 
