@@ -170,6 +170,16 @@
             .cursor, .cursor-dot { display: none; }
             body { cursor: auto; }
             .hero-name { font-size: clamp(3.5rem, 14vw, 8rem); }
+            .awards-content > div:first-child {
+            min-width: 100%; /* 确保文字容器占满宽度 */
+            }
+            .awards-content ul li span {
+              word-break: break-word; /* 允许文字换行 */
+              white-space: normal; /* 正常换行 */
+            }
+            .award-photo {
+              display: none; /* 手机端隐藏图片 */
+            }
         }
         
         /* Progress Ring */
@@ -594,6 +604,7 @@
 </body>
 
 </html>
+
 
 
 
