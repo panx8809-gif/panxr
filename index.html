@@ -557,7 +557,7 @@
                     // Cursor
                     const cursor = document.getElementById('cursor');
                     const cursorDot = document.getElementById('cursorDot');
-                    if (cursor && !window.match('(pointer: coarse)').matches) {
+                    if (cursor && !window.matchMedia('(pointer: coarse)').matches) {
                         document.addEventListener('mousemove', (e) => {
                             gsap.to(cursor, { x: e.clientX, y: e.clientY, duration: 0.1 });
                             gsap.to(cursorDot, { x: e.clientX, y: e.clientY, duration: 0.05 });
@@ -604,6 +604,10 @@
 </body>
 
 </html>
+
+
+
+
 
 
 
