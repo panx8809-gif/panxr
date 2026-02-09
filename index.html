@@ -177,9 +177,6 @@
               word-break: break-word; /* 允许文字换行 */
               white-space: normal; /* 正常换行 */
             }
-            .award-photo {
-              display: none; /* 手机端隐藏图片 */
-            }
         }
         
         /* Progress Ring */
@@ -557,7 +554,7 @@
                     // Cursor
                     const cursor = document.getElementById('cursor');
                     const cursorDot = document.getElementById('cursorDot');
-                    if (cursor && !window.matchMedia('(pointer: coarse)').matches) {
+                    if (cursor && !window.match('(pointer: coarse)').matches) {
                         document.addEventListener('mousemove', (e) => {
                             gsap.to(cursor, { x: e.clientX, y: e.clientY, duration: 0.1 });
                             gsap.to(cursorDot, { x: e.clientX, y: e.clientY, duration: 0.05 });
@@ -604,6 +601,7 @@
 </body>
 
 </html>
+
 
 
 
